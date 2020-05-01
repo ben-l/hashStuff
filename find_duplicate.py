@@ -6,7 +6,6 @@ import sys
 
 file_list = {}
 reverse_dict = {}
-duplicate_files = []
 
 
 def hasher(saidfile, thumbprint):
@@ -19,26 +18,27 @@ def hasher(saidfile, thumbprint):
                 hash_function.update(chunk)
                 chunk = e.read(BLOCK_SIZE)
     except IOError:
-        print("Requires a file only")
+        print("{} : Cannot read file".format(saidfile))
+        pass
     else:
         hash_result = hash_function.hexdigest()
         return hash_result, thumbprint
 
 
 def chosen_dir(dir):
-    if os.path.isdir(dir):
+    try:
+        os.path.exists(dir)
+    except FileNotFoundError:
+        print("directory not found")
+    else:
         try:
-            os.path.exists(dir)
-        except FileNotFoundError:
-            print("directory not found")
-        else:
             for root, dirs, files in os.walk(dir):
                 for file in files:
                     hash_result, thumbprint = hasher(
-                            os.path.join(root, file), 'sha1')
+                        os.path.join(root, file), 'sha1')
                     file_list[(os.path.join(root, file))] = hash_result
-    else:
-        return False
+        except TypeError:
+            pass
 
 
 def dict_rev(dic):
